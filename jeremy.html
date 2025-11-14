@@ -69,27 +69,133 @@ bgAnim();
 <FONT SIZE="+3" FACE="Courier" COLOR="#000000"><B>JEREMY</B></FONT>
 <BR><BR>
 <CENTER>
-<PRE ID="ascii4" STYLE="font-family: Courier; font-size: 14px; text-align: center; margin: 0 auto;"></PRE>
-<SCRIPT>
-var frames4 = [
-'  +---+  \n  |   |  \n  +---+  ',
-'  +-+-+  \n  | | |  \n  +-+-+  ',
-'  +---+  \n  |   |  \n  +---+  ',
-'  +-+-+  \n  | | |  \n  +-+-+  '
-];
-var f4 = 0;
-function anim4() {
-  document.getElementById('ascii4').textContent = frames4[f4];
-  f4 = (f4 + 1) % frames4.length;
-  setTimeout(anim4, 350);
-}
-anim4();
-</SCRIPT>
+<PRE ID="jeremyPet" STYLE="font-family: Courier; font-size: 12px; text-align: center; margin: 0 auto; min-height: 100px;"></PRE>
 </CENTER>
 <BR><BR>
-<FONT SIZE="+1" FACE="Times" COLOR="#000000">
-Jeremy content coming soon!
-</FONT>
+<CENTER>
+<INPUT TYPE="BUTTON" VALUE="PET" ONCLICK="petJeremy()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="FEED" ONCLICK="feedJeremy()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="SLEEP" ONCLICK="sleepJeremy()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+</CENTER>
+<BR><BR>
+<SCRIPT>
+var jeremyElement = document.getElementById('jeremyPet');
+var isAnimating = false;
+var idleTimeout;
+
+// Idle animations (3 different ones)
+var idleAnimations = [
+  [
+    '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /     \\   '
+  ],
+  [
+    '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   '
+  ],
+  [
+    '    /\\_/\\    \n   ( o.o )   \n    > ~ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( o.o )   \n    > ~ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( o.o )   \n    > ~ <    \n   /     \\   ',
+    '    /\\_/\\    \n   ( o.o )   \n    > ~ <    \n   /     \\   '
+  ]
+];
+
+// Pet animation
+var petFrames = [
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( ^.^ )   \n    > ^ <    \n   /     \\   '
+];
+
+// Feed animation
+var feedFrames = [
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /  ~   \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /  ~~  \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /  ~~~ \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /  ~~  \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /  ~   \\   ',
+  '    /\\_/\\    \n   ( o.o )   \n    > ^ <    \n   /     \\   '
+];
+
+// Sleep animation
+var sleepFrames = [
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /  z   \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /  zz  \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /  zzz \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /  zz  \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /  z   \\   ',
+  '    /\\_/\\    \n   ( -.- )   \n    >   <    \n   /     \\   '
+];
+
+var currentIdleAnim = 0;
+var idleFrame = 0;
+
+function playAnimation(frames, callback) {
+  if(isAnimating) return;
+  isAnimating = true;
+  clearTimeout(idleTimeout);
+  
+  var frameIndex = 0;
+  function animate() {
+    if(frameIndex < frames.length) {
+      jeremyElement.textContent = frames[frameIndex];
+      frameIndex++;
+      setTimeout(animate, 300);
+    } else {
+      isAnimating = false;
+      if(callback) callback();
+      startIdleAnimation();
+    }
+  }
+  animate();
+}
+
+function petJeremy() {
+  playAnimation(petFrames);
+}
+
+function feedJeremy() {
+  playAnimation(feedFrames);
+}
+
+function sleepJeremy() {
+  playAnimation(sleepFrames);
+}
+
+function startIdleAnimation() {
+  if(isAnimating) return;
+  
+  function idleLoop() {
+    if(isAnimating) return;
+    
+    var anim = idleAnimations[currentIdleAnim];
+    jeremyElement.textContent = anim[idleFrame];
+    idleFrame = (idleFrame + 1) % anim.length;
+    
+    if(idleFrame === 0) {
+      currentIdleAnim = (currentIdleAnim + 1) % idleAnimations.length;
+    }
+    
+    idleTimeout = setTimeout(idleLoop, 800);
+  }
+  
+  idleLoop();
+}
+
+// Start idle animation on page load
+startIdleAnimation();
+</SCRIPT>
 </TD>
 </TR>
 </TABLE>
