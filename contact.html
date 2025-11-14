@@ -39,9 +39,24 @@
 <FONT SIZE="+3" FACE="Courier" COLOR="#000000"><B>CONTACT</B></FONT>
 <BR><BR>
 <CENTER>
-<IMG SRC="https://ascii.co.uk/animated/circle.gif" ALT="ASCII Animation">
-<BR>
-<FONT SIZE="-1" COLOR="#000000">Animation via <A HREF="https://ascii.co.uk/animated">ascii.co.uk</A></FONT>
+<PRE ID="ascii5" STYLE="font-family: Courier; font-size: 14px; text-align: center; margin: 0 auto;"></PRE>
+<FONT SIZE="-1" COLOR="#000000">ASCII Animation</FONT>
+<SCRIPT>
+var frames5 = [
+'   ___   \n  /   \\  \n |     | \n  \\___/  ',
+'  /---\\  \n |     | \n  \\---/  ',
+' |     | \n  \\___/  \n   ___   ',
+'  \\---/  \n |     | \n  /---\\  ',
+'  \\___/  \n   ___   \n  /   \\  '
+];
+var f5 = 0;
+function anim5() {
+  document.getElementById('ascii5').textContent = frames5[f5];
+  f5 = (f5 + 1) % frames5.length;
+  setTimeout(anim5, 400);
+}
+anim5();
+</SCRIPT>
 </CENTER>
 <BR><BR>
 <FONT SIZE="+1" FACE="Times" COLOR="#000000">

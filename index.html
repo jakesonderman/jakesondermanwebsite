@@ -42,9 +42,23 @@
 <FONT SIZE="+2" COLOR="#000000"><B>Personal website of Jake Sonderman - Under Construction!</B></FONT>
 </MARQUEE>
 <BR><BR>
-<IMG SRC="https://ascii.co.uk/animated/soothing-black-and-white-by-pislices.gif" ALT="ASCII Animation">
-<BR>
-<FONT SIZE="-1" COLOR="#000000">Animation by pislices10 via <A HREF="https://ascii.co.uk/animated">ascii.co.uk</A></FONT>
+<PRE ID="ascii1" STYLE="font-family: Courier; font-size: 10px; text-align: center; margin: 0 auto;"></PRE>
+<FONT SIZE="-1" COLOR="#000000">ASCII Animation</FONT>
+<SCRIPT>
+var frames1 = [
+'  ___   ___  \n /   \\ /   \\ \n|     |     |\n \\___/ \\___/ ',
+'  ___   ___  \n /   \\ /   \\ \n|  o  |  o  |\n \\___/ \\___/ ',
+'  ___   ___  \n /   \\ /   \\ \n|  -  |  -  |\n \\___/ \\___/ ',
+'  ___   ___  \n /   \\ /   \\ \n|  o  |  o  |\n \\___/ \\___/ '
+];
+var f1 = 0;
+function anim1() {
+  document.getElementById('ascii1').textContent = frames1[f1];
+  f1 = (f1 + 1) % frames1.length;
+  setTimeout(anim1, 500);
+}
+anim1();
+</SCRIPT>
 <BR><BR>
 <FONT SIZE="+2" COLOR="#000000"><B>NEW!</B></FONT>
 </TD>
@@ -61,9 +75,24 @@
 <FONT SIZE="+2" FACE="Times" COLOR="#000000"><B>Hello, I'm Jake!</B></FONT>
 <BR><BR>
 <CENTER>
-<IMG SRC="https://ascii.co.uk/animated/black-and-white-loop-by-pislices10.gif" ALT="ASCII Animation">
-<BR>
-<FONT SIZE="-1" COLOR="#000000">Animation by pislices10 via <A HREF="https://ascii.co.uk/animated">ascii.co.uk</A></FONT>
+<PRE ID="ascii2" STYLE="font-family: Courier; font-size: 12px; text-align: center; margin: 0 auto;"></PRE>
+<FONT SIZE="-1" COLOR="#000000">ASCII Animation</FONT>
+<SCRIPT>
+var frames2 = [
+'    |    \n   /|\\   \n  / | \\  \n /  |  \\ \n    |    ',
+'   /|\\   \n  / | \\  \n /  |  \\ \n    |    \n    |    ',
+'  / | \\  \n /  |  \\ \n    |    \n    |    \n   /|\\   ',
+' /  |  \\ \n    |    \n    |    \n   /|\\   \n  / | \\  ',
+'    |    \n    |    \n   /|\\   \n  / | \\  \n /  |  \\ '
+];
+var f2 = 0;
+function anim2() {
+  document.getElementById('ascii2').textContent = frames2[f2];
+  f2 = (f2 + 1) % frames2.length;
+  setTimeout(anim2, 300);
+}
+anim2();
+</SCRIPT>
 </CENTER>
 <BR><BR>
 <FONT SIZE="+1" FACE="Times" COLOR="#000000">
@@ -97,7 +126,7 @@ This site is best viewed in Netscape Navigator 3.0 or higher
 <FONT SIZE="-1" COLOR="#000000">
 &copy; 2024 Jake Sonderman. All rights reserved.
 <BR>
-ASCII animations from <A HREF="https://ascii.co.uk/animated">ascii.co.uk</A> - All artists credited on respective pages.
+ASCII animations created with JavaScript.
 </FONT>
 </TD>
 </TR>
