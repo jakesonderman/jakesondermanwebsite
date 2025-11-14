@@ -69,7 +69,7 @@ bgAnim();
 <FONT SIZE="+3" FACE="Courier" COLOR="#000000"><B>JEREMY</B></FONT>
 <BR><BR>
 <CENTER>
-<PRE ID="jeremyPet" STYLE="font-family: Courier; font-size: 11px; text-align: center; margin: 0 auto; min-height: 150px; line-height: 1.2;"></PRE>
+<PRE ID="jeremyPet" STYLE="font-family: Courier; font-size: 12px; text-align: center; margin: 0 auto; min-height: 100px;"></PRE>
 </CENTER>
 <BR><BR>
 <CENTER>
@@ -83,67 +83,69 @@ var jeremyElement = document.getElementById('jeremyPet');
 var isAnimating = false;
 var idleTimeout;
 
-// Idle animations (3 different ones) - larger detailed cat from asciiart.eu
+// Idle animations (3 different ones) - simple cat design
 var idleAnimations = [
   [
-    '      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    '
+    '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | o_o |  \n    \\_^_/   '
   ],
   [
-    '      /\\_/\\  (  \n     ( -.- ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( -.- ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( -.- ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( -.- ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    '
+    '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
+    '   |\\---/|  \n   | -_- |  \n    \\_^_/   '
   ],
   [
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-    '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    '
+    '   |\\---/|  \n   | o_o |  \n    \\_~_/   ',
+    '   |\\---/|  \n   | o_o |  \n    \\_~_/   ',
+    '   |\\---/|  \n   | o_o |  \n    \\_~_/   ',
+    '   |\\---/|  \n   | o_o |  \n    \\_~_/   '
   ]
 ];
 
 // Pet animation - detailed petting with big hand
 var petFrames = [
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '     \\___/      \n      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '     \\___/      \n      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '     \\___/      \n      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( ^.^ ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    '
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   \\___/    \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   \\___/    \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   \\___/    \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   \\___/    \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   '
 ];
 
 // Feed animation - detailed eating with food in mouth
 var feedFrames = [
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.O ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o<><o) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o<><o) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o<><o) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.O ) _)  \n      \\"~  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    '
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_O |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o<><o|  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
+  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
+  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
+  '   |\\---/|  \n   | o_O |  \n    \\_~_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   '
 ];
 
 // Sleep animation - detailed sideways sleeping with tail up and Z's going up
 var sleepFrames = [
-  '      /\\_/\\  (  \n     ( o.o ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '      /\\_/\\  (  \n     ( -.- ) _)  \n      \\"/  (     \n     ( | | )     \n    (__d b__)    ',
-  '     /\\_/\\  (   \n    ( -.- ) _)   \n     \\"/  (      \n    ( | | )      \n   (__d b__)     ',
-  '    /\\_/\\  (    z\n   ( -.- ) _)   z\n    \\"/  (       z\n   ( | | )       z\n  (__d b__)      z',
-  '   /\\_/\\  (     zz    |\n  ( -.- ) _)    zz    |\n   \\"/  (        zz    |\n  ( | | )        zz    |\n (__d b__)       zz    |',
-  '  /\\_/\\  (      zzz   |\n ( -.- ) _)     zzz   |\n  \\"/  (         zzz   |\n ( | | )         zzz   |\n(__d b__)        zzz   |',
-  ' /\\_/\\  (       zzzz  |\n( -.- ) _)      zzzz  |\n \\"/  (          zzzz  |\n( | | )          zzzz  |\n(__d b__)         zzzz  |',
-  '/\\_/\\  (        zzzzz |\n( -.- ) _)       zzzzz |\n \\"/  (           zzzzz |\n( | | )           zzzzz |\n(__d b__)          zzzzz |',
-  '/\\_/\\  (        zzzzzz|\n( -.- ) _)       zzzzzz|\n \\"/  (           zzzzzz|\n( | | )           zzzzzz|\n(__d b__)          zzzzzz|',
-  '/\\_/\\  (        zzzzzzz|\n( -.- ) _)       zzzzzzz|\n \\"/  (           zzzzzzz|\n( | | )           zzzzzzz|\n(__d b__)          zzzzzzz|',
-  '/\\_/\\  (        zzzzzzzz|\n( -.- ) _)       zzzzzzzz|\n \\"/  (           zzzzzzzz|\n( | | )           zzzzzzzz|\n(__d b__)          zzzzzzzz|',
-  '/\\_/\\  (        zzzzzzzzz|\n( -.- ) _)       zzzzzzzzz|\n \\"/  (           zzzzzzzzz|\n( | | )           zzzzzzzzz|\n(__d b__)          zzzzzzzzz|'
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
+  '  |\\---/|   \n  | -_- |   \n   \\_^_/    ',
+  '  |\\---/|   z\n  | -_- |   z\n   \\_^_/    z',
+  ' |\\---/|    zz    |\n | -_- |    zz    |\n  \\_^_/     zz    |',
+  '|\\---/|     zzz   |\n| -_- |     zzz   |\n \\_^_/      zzz   |',
+  '|\\---/|     zzzz  |\n| -_- |     zzzz  |\n \\_^_/      zzzz  |',
+  '|\\---/|     zzzzz |\n| -_- |     zzzzz |\n \\_^_/      zzzzz |',
+  '|\\---/|     zzzzzz|\n| -_- |     zzzzzz|\n \\_^_/      zzzzzz|',
+  '|\\---/|     zzzzzzz|\n| -_- |     zzzzzzz|\n \\_^_/      zzzzzzz|',
+  '|\\---/|     zzzzzzzz|\n| -_- |     zzzzzzzz|\n \\_^_/      zzzzzzzz|',
+  '|\\---/|     zzzzzzzzz|\n| -_- |     zzzzzzzzz|\n \\_^_/      zzzzzzzzz|'
 ];
 
 var currentIdleAnim = 0;
