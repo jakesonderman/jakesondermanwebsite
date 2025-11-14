@@ -25,10 +25,11 @@ This is a personal website for jakesonderman.com, a multi-page site deployed via
 ## Development Guidelines
 
 1. **File Organization**: Keep files organized by type (HTML, CSS, JS, images)
-2. **Code Style**: Use clean, semantic HTML and modern CSS/JS
-3. **Responsive Design**: Ensure all pages are mobile-responsive
-4. **Performance**: Optimize images and assets for web
-5. **Accessibility**: Follow WCAG guidelines for accessibility
+2. **Design Style**: **Old HTML/retro 90s web aesthetic** - Think classic web design with bright colors, Times New Roman fonts, animated backgrounds, and nostalgic web elements
+3. **Code Style**: Use clean, semantic HTML with retro styling
+4. **Responsive Design**: Ensure all pages are mobile-responsive (but maintain retro aesthetic)
+5. **Performance**: Optimize images and assets for web
+6. **Accessibility**: Follow WCAG guidelines for accessibility
 
 ## Common Tasks
 

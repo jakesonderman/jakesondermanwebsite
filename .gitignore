@@ -28,3 +28,6 @@ build/
 *.min.js
 *.min.css
 
+
+# Local Netlify folder
+.netlify
