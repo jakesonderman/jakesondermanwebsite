@@ -5,6 +5,36 @@
 <META NAME="description" CONTENT="Contact Jake Sonderman">
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#000000" VLINK="#000000" ALINK="#000000">
+<PRE ID="bgAnim" STYLE="position: fixed; top: 0; left: 0; width: 100%; height: 100%; font-family: Courier; font-size: 8px; color: #CCCCCC; z-index: -1; overflow: hidden; pointer-events: none; line-height: 1;"></PRE>
+<SCRIPT>
+var bgFrames = [];
+for(var i = 0; i < 20; i++) {
+  var frame = '';
+  for(var y = 0; y < 50; y++) {
+    for(var x = 0; x < 100; x++) {
+      var rand = Math.random();
+      if(rand < 0.1) frame += '*';
+      else if(rand < 0.15) frame += '+';
+      else if(rand < 0.2) frame += '-';
+      else if(rand < 0.22) frame += '|';
+      else if(rand < 0.24) frame += '/';
+      else if(rand < 0.26) frame += '\\';
+      else if(rand < 0.28) frame += '=';
+      else if(rand < 0.3) frame += '#';
+      else frame += ' ';
+    }
+    frame += '\n';
+  }
+  bgFrames.push(frame);
+}
+var bgf = 0;
+function bgAnim() {
+  document.getElementById('bgAnim').textContent = bgFrames[bgf];
+  bgf = (bgf + 1) % bgFrames.length;
+  setTimeout(bgAnim, 200);
+}
+bgAnim();
+</SCRIPT>
 
 <CENTER>
 <TABLE WIDTH="90%" BORDER="3" CELLPADDING="10" CELLSPACING="5" BGCOLOR="#FFFFFF">
