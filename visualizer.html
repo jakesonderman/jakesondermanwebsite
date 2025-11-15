@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>ASCII Audio Visualizer - Jake Sonderman</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000" LINK="#000000" VLINK="#000000" ALINK="#000000">
+<TABLE WIDTH="100%" BORDER="0" CELLPADDING="20" CELLSPACING="0">
+<TR>
+<TD>
+<CENTER>
+<FONT SIZE="+3" FACE="Courier" COLOR="#000000"><B>ASCII AUDIO VISUALIZER</B></FONT>
+<BR><BR>
+<FONT SIZE="+1" FACE="Courier" COLOR="#000000">Drop an audio file below or click to select</FONT>
+<BR><BR>
+<DIV ID="dropZone" STYLE="border: 3px dashed #000000; padding: 40px; margin: 20px auto; width: 80%; background-color: #FFFFFF; cursor: pointer; text-align: center;">
+<FONT FACE="Courier" SIZE="+1" COLOR="#000000">
+<B>DRAG & DROP AUDIO FILE HERE</B><BR>
+OR CLICK TO SELECT
+</FONT>
+</DIV>
+<INPUT TYPE="FILE" ID="fileInput" ACCEPT="audio/*" STYLE="display: none;">
+<BR><BR>
+<DIV ID="audioInfo" STYLE="font-family: Courier; font-size: 14px; margin: 10px; display: none;">
+<B>Now Playing:</B> <SPAN ID="fileName"></SPAN>
+</DIV>
+<BR>
+<AUDIO ID="audioPlayer" CONTROLS STYLE="width: 80%; max-width: 600px; display: none;">
+Your browser does not support the audio element.
+</AUDIO>
+<BR><BR>
+<CENTER>
+<INPUT TYPE="BUTTON" ID="playBtn" VALUE="PLAY" ONCLICK="togglePlay()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; display: none;">
+<INPUT TYPE="BUTTON" ID="pauseBtn" VALUE="PAUSE" ONCLICK="togglePause()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; display: none;">
+</CENTER>
+<BR><BR>
+<CENTER>
+<A HREF="index.html"><FONT FACE="Courier" COLOR="#000000">HOME</FONT></A> | 
+<A HREF="games.html"><FONT FACE="Courier" COLOR="#000000">GAMES</FONT></A> | 
+<A HREF="jeremy.html"><FONT FACE="Courier" COLOR="#000000">JEREMY</FONT></A> | 
+<A HREF="contact.html"><FONT FACE="Courier" COLOR="#000000">CONTACT</FONT></A>
+</CENTER>
+</TD>
+</TR>
+</TABLE>
+<SCRIPT>
+var audioPlayer = document.getElementById('audioPlayer');
+var fileInput = document.getElementById('fileInput');
+var dropZone = document.getElementById('dropZone');
+var audioInfo = document.getElementById('audioInfo');
+var fileName = document.getElementById('fileName');
+var playBtn = document.getElementById('playBtn');
+var pauseBtn = document.getElementById('pauseBtn');
+
+// Click drop zone to select file
+dropZone.onclick = function() {
+  fileInput.click();
+};
+
+// File input change
+fileInput.onchange = function(e) {
+  var file = e.target.files[0];
+  if(file) {
+    loadAudioFile(file);
+  }
+};
+
+// Drag and drop handlers
+dropZone.ondragover = function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  dropZone.style.backgroundColor = '#F0F0F0';
+};
+
+dropZone.ondragleave = function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  dropZone.style.backgroundColor = '#FFFFFF';
+};
+
+dropZone.ondrop = function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  dropZone.style.backgroundColor = '#FFFFFF';
+  
+  var files = e.dataTransfer.files;
+  if(files.length > 0) {
+    var file = files[0];
+    if(file.type.startsWith('audio/')) {
+      loadAudioFile(file);
+    } else {
+      alert('Please drop an audio file (MP3, WAV, OGG, etc.)');
+    }
+  }
+};
+
+function loadAudioFile(file) {
+  var reader = new FileReader();
+  
+  reader.onload = function(e) {
+    var audioUrl = e.target.result;
+    audioPlayer.src = audioUrl;
+    fileName.textContent = file.name;
+    audioInfo.style.display = 'block';
+    audioPlayer.style.display = 'block';
+    playBtn.style.display = 'inline-block';
+    pauseBtn.style.display = 'inline-block';
+  };
+  
+  reader.readAsDataURL(file);
+}
+
+function togglePlay() {
+  audioPlayer.play();
+}
+
+function togglePause() {
+  audioPlayer.pause();
+}
+
+// Update button states based on audio playback
+audioPlayer.onplay = function() {
+  playBtn.style.display = 'none';
+  pauseBtn.style.display = 'inline-block';
+};
+
+audioPlayer.onpause = function() {
+  playBtn.style.display = 'inline-block';
+  pauseBtn.style.display = 'none';
+};
+
+audioPlayer.onended = function() {
+  playBtn.style.display = 'inline-block';
+  pauseBtn.style.display = 'none';
+};
+</SCRIPT>
+</BODY>
+</HTML>
+
