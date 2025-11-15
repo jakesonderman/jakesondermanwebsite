@@ -33,6 +33,21 @@ Your browser does not support the audio element.
 <INPUT TYPE="BUTTON" ID="pauseBtn" VALUE="PAUSE" ONCLICK="togglePause()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; display: none;">
 </CENTER>
 <BR><BR>
+<DIV ID="visualizerOptions" STYLE="display: none; margin: 20px auto; width: 90%; max-width: 800px;">
+<FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>COLOR OPTIONS:</B></FONT><BR>
+<INPUT TYPE="BUTTON" VALUE="BLACK" ONCLICK="setColor('#000000')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; color: #000000;">
+<INPUT TYPE="BUTTON" VALUE="GREEN" ONCLICK="setColor('#00FF00')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; color: #00FF00;">
+<INPUT TYPE="BUTTON" VALUE="BLUE" ONCLICK="setColor('#0000FF')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; color: #0000FF;">
+<INPUT TYPE="BUTTON" VALUE="RED" ONCLICK="setColor('#FF0000')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; color: #FF0000;">
+<BR><BR>
+<FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>CHARACTER SET:</B></FONT><BR>
+<INPUT TYPE="BUTTON" VALUE="STARS (*)" ONCLICK="setChars('*', '.')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="BARS (|)" ONCLICK="setChars('|', ':')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="HASH (#)" ONCLICK="setChars('#', '+')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="AT (@)" ONCLICK="setChars('@', 'O')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="EQUALS (=)" ONCLICK="setChars('=', '-')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+</DIV>
+<BR><BR>
 <PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 10px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.1;"></PRE>
 <BR><BR>
 <CENTER>
@@ -60,6 +75,11 @@ var analyser = null;
 var dataArray = null;
 var animationFrameId = null;
 var source = null;
+
+// Visualizer options
+var currentColor = '#000000';
+var mainChar = '*';
+var nearChar = '.';
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -140,8 +160,9 @@ function setupAudioContext() {
       var bufferLength = analyser.fftSize;
       dataArray = new Uint8Array(bufferLength);
       
-      // Show visualizer
+      // Show visualizer and options
       scopeVisualizer.style.display = 'block';
+      document.getElementById('visualizerOptions').style.display = 'block';
       
       // Start visualization loop
       visualize();
@@ -192,9 +213,9 @@ function visualize() {
         yPos = Math.max(0, Math.min(height - 1, yPos));
         
         if(y === yPos) {
-          line += '*'; // Waveform point
+          line += mainChar; // Waveform point
         } else if(Math.abs(y - yPos) === 1) {
-          line += '.'; // Near waveform
+          line += nearChar; // Near waveform
         } else {
           line += ' '; // Empty space
         }
@@ -203,9 +224,20 @@ function visualize() {
     }
     
     scopeVisualizer.textContent = output;
+    scopeVisualizer.style.color = currentColor;
   }
   
   draw();
+}
+
+function setColor(color) {
+  currentColor = color;
+  scopeVisualizer.style.color = color;
+}
+
+function setChars(main, near) {
+  mainChar = main;
+  nearChar = near;
 }
 
 function togglePlay() {
