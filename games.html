@@ -103,6 +103,7 @@ Press ENTER to start! Press SPACE to jump! Avoid the obstacles!
 <BR>
 <CENTER>
 <DIV ID="score" STYLE="font-family: Courier; font-size: 18px; font-weight: bold;">SCORE: 0</DIV>
+<DIV ID="debug" STYLE="font-family: Courier; font-size: 12px; color: #666;">Obstacles: 0 | Jump: 0</DIV>
 <DIV ID="startMessage" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #0000FF;">PRESS ENTER TO START</DIV>
 <DIV ID="gameOver" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #FF0000; display: none;">GAME OVER! Press ENTER to restart</DIV>
 </CENTER>
@@ -112,13 +113,14 @@ var canvas = document.getElementById('gameCanvas');
 var scoreDisplay = document.getElementById('score');
 var gameOverDisplay = document.getElementById('gameOver');
 var startMessageDisplay = document.getElementById('startMessage');
+var debugDisplay = document.getElementById('debug');
 
 var gameWidth = 70;
 var gameHeight = 12;
 var gameRunning = false;
 var gameStarted = false;
 var score = 0;
-var gameSpeed = 150;
+var gameSpeed = 50;  // Faster game loop (lower = faster)
 
 // Jeremy the cat (player)
 var jeremy = {
@@ -143,7 +145,7 @@ var jeremy = {
 // Obstacles
 var obstacles = [];
 var obstacleSpawnTimer = 0;
-var obstacleSpawnInterval = 20;
+var obstacleSpawnInterval = 60;  // Adjusted for faster game speed
 
 // Obstacle types
 var obstacleTypes = [
@@ -158,11 +160,10 @@ function initGame() {
   score = 0;
   obstacles = [];
   obstacleSpawnTimer = 0;
-  obstacleSpawnInterval = 20;
+  obstacleSpawnInterval = 60;  // Reset to initial spawn rate
   jeremy.y = 9;
   jeremy.jumping = false;
   jeremy.jumpHeight = 0;
-  jeremy.jumpSpeed = 0;
   gameOverDisplay.style.display = 'none';
   startMessageDisplay.style.display = 'none';
   scoreDisplay.textContent = 'SCORE: 0';
@@ -206,7 +207,7 @@ function updateGame() {
     createObstacle();
     obstacleSpawnTimer = 0;
     // Gradually increase difficulty
-    if (obstacleSpawnInterval > 12) {
+    if (obstacleSpawnInterval > 35) {
       obstacleSpawnInterval -= 0.1;
     }
   }
@@ -232,15 +233,18 @@ function updateGame() {
 }
 
 function checkCollision(player, obstacle) {
-  var playerLeft = player.x;
-  var playerRight = player.x + 8;
-  var playerTop = player.y - player.jumpHeight;
-  var playerBottom = playerTop + 3;
+  // Much smaller hitboxes for more forgiving gameplay
+  var hitboxPadding = 2;  // Shrink hitboxes by 2 pixels on each side
+  
+  var playerLeft = player.x + hitboxPadding;
+  var playerRight = player.x + 8 - hitboxPadding;
+  var playerTop = player.y - player.jumpHeight + hitboxPadding;
+  var playerBottom = playerTop + 3 - hitboxPadding;
 
-  var obsLeft = obstacle.x;
-  var obsRight = obstacle.x + obstacle.width;
-  var obsTop = obstacle.y - obstacle.height + 1;
-  var obsBottom = obstacle.y + 1;
+  var obsLeft = obstacle.x + hitboxPadding;
+  var obsRight = obstacle.x + obstacle.width - hitboxPadding;
+  var obsTop = obstacle.y - obstacle.height + 1 + hitboxPadding;
+  var obsBottom = obstacle.y + 1 - hitboxPadding;
 
   return playerRight > obsLeft && 
          playerLeft < obsRight && 
@@ -312,6 +316,11 @@ function renderGame() {
   }
   
   canvas.textContent = output;
+  
+  // Update debug info
+  if (debugDisplay) {
+    debugDisplay.textContent = 'Obstacles: ' + obstacles.length + ' | Jump Height: ' + jeremy.jumpHeight + ' | Jumping: ' + jeremy.jumping;
+  }
 }
 
 function gameLoop() {
