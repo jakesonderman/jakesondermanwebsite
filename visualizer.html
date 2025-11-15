@@ -267,21 +267,18 @@ function visualize() {
       
       scopeVisualizer.textContent = output;
     } else if(currentMode === 'waveform') {
-      // WAVEFORM MODE - Long-term scrolling waveform
+      // WAVEFORM MODE - Scrolling waveform (captured values scroll across, don't change)
       analyser.getByteTimeDomainData(dataArray);
       
-      // Sample a few points from current frame and add to history (always sample at same rate)
-      var samplesPerFrame = 5; // How many samples to take per frame
-      var step = Math.floor(dataArray.length / samplesPerFrame);
-      for(var s = 0; s < samplesPerFrame; s++) {
-        var sampleIndex = s * step;
-        if(sampleIndex < dataArray.length) {
-          waveformHistory.push(dataArray[sampleIndex]);
-          // Keep more history based on time scale (scrolls at same speed, shows longer period)
-          if(waveformHistory.length > waveformHistorySize) {
-            waveformHistory.shift(); // Remove oldest (scrolls left)
-          }
-        }
+      // Sample one value from current frame (average or center point) and add to history
+      // This value is frozen and will scroll across the screen unchanged
+      var centerIndex = Math.floor(dataArray.length / 2);
+      var capturedValue = dataArray[centerIndex];
+      
+      // Add to history buffer (newest on right, scrolls left)
+      waveformHistory.push(capturedValue);
+      if(waveformHistory.length > waveformHistorySize) {
+        waveformHistory.shift(); // Remove oldest (scrolls left)
       }
       
       var width = 100;
@@ -289,6 +286,7 @@ function visualize() {
       var output = '';
       
       // Display the history scrolling left to right (oldest left, newest right)
+      // Each column represents a captured value that doesn't change as it scrolls
       for(var y = 0; y < height; y++) {
         var line = '';
         for(var x = 0; x < width; x++) {
