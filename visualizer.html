@@ -51,6 +51,15 @@ Your browser does not support the audio element.
 <INPUT TYPE="BUTTON" VALUE="SCOPE" ONCLICK="setMode('scope')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="WAVEFORM" ONCLICK="setMode('waveform')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="STEREOMETER" ONCLICK="setMode('stereo')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<BR><BR>
+<DIV ID="waveformTimeScale" STYLE="display: none;">
+<FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>TIME SCALE:</B></FONT><BR>
+<INPUT TYPE="BUTTON" VALUE="1x" ONCLICK="setTimeScale(1)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="/4" ONCLICK="setTimeScale(4)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="/8" ONCLICK="setTimeScale(8)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="/32" ONCLICK="setTimeScale(32)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="/64" ONCLICK="setTimeScale(64)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+</DIV>
 </DIV>
 <BR><BR>
 <PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 10px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.1;"></PRE>
@@ -95,6 +104,8 @@ var rightDataArray = null;
 // Waveform history buffer for long-term display
 var waveformHistory = [];
 var waveformHistorySize = 200; // Number of sample columns to keep
+var waveformTimeScale = 1; // Time scale divisor (1, 4, 8, 32, 64)
+var waveformFrameCounter = 0; // Counter for time scale sampling
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -195,6 +206,10 @@ function setupAudioContext() {
       // Show visualizer and options
       scopeVisualizer.style.display = 'block';
       document.getElementById('visualizerOptions').style.display = 'block';
+      // Show time scale options if in waveform mode
+      if(currentMode === 'waveform') {
+        document.getElementById('waveformTimeScale').style.display = 'block';
+      }
       
       // Start visualization loop
       visualize();
@@ -255,15 +270,21 @@ function visualize() {
       // WAVEFORM MODE - Long-term scrolling waveform
       analyser.getByteTimeDomainData(dataArray);
       
-      // Sample a few points from current frame and add to history
-      var samplesPerFrame = 5; // How many samples to take per frame
-      var step = Math.floor(dataArray.length / samplesPerFrame);
-      for(var s = 0; s < samplesPerFrame; s++) {
-        var sampleIndex = s * step;
-        if(sampleIndex < dataArray.length) {
-          waveformHistory.push(dataArray[sampleIndex]);
-          if(waveformHistory.length > waveformHistorySize) {
-            waveformHistory.shift(); // Remove oldest (scrolls left)
+      // Only sample based on time scale (skip frames for longer time periods)
+      waveformFrameCounter++;
+      if(waveformFrameCounter >= waveformTimeScale) {
+        waveformFrameCounter = 0;
+        
+        // Sample a few points from current frame and add to history
+        var samplesPerFrame = 5; // How many samples to take per frame
+        var step = Math.floor(dataArray.length / samplesPerFrame);
+        for(var s = 0; s < samplesPerFrame; s++) {
+          var sampleIndex = s * step;
+          if(sampleIndex < dataArray.length) {
+            waveformHistory.push(dataArray[sampleIndex]);
+            if(waveformHistory.length > waveformHistorySize) {
+              waveformHistory.shift(); // Remove oldest (scrolls left)
+            }
           }
         }
       }
@@ -399,7 +420,16 @@ function setMode(mode) {
   // Clear waveform history when switching modes
   if(mode !== 'waveform') {
     waveformHistory = [];
+    waveformFrameCounter = 0;
+    document.getElementById('waveformTimeScale').style.display = 'none';
+  } else {
+    document.getElementById('waveformTimeScale').style.display = 'block';
   }
+}
+
+function setTimeScale(scale) {
+  waveformTimeScale = scale;
+  waveformFrameCounter = 0; // Reset counter
 }
 
 function togglePlay() {
