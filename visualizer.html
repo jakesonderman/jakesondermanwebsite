@@ -33,7 +33,7 @@ Your browser does not support the audio element.
 <INPUT TYPE="BUTTON" ID="pauseBtn" VALUE="PAUSE" ONCLICK="togglePause()" STYLE="font-family: Courier; font-size: 14px; padding: 10px 20px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer; display: none;">
 </CENTER>
 <BR><BR>
-<PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 20px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.2;"></PRE>
+<PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 10px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.1;"></PRE>
 <BR><BR>
 <CENTER>
 <A HREF="index.html"><FONT FACE="Courier" COLOR="#000000">HOME</FONT></A> | 
@@ -172,9 +172,9 @@ function visualize() {
     // Get waveform data (time domain - actual audio buffer samples)
     analyser.getByteTimeDomainData(dataArray);
     
-    // Create ASCII scope visualization
-    var width = 80;
-    var height = 20;
+    // Create ASCII scope visualization - extended to edges
+    var width = 100;
+    var height = 25;
     var output = '';
     
     // Create grid
@@ -191,14 +191,9 @@ function visualize() {
         var yPos = Math.floor((height / 2) - normalizedValue);
         yPos = Math.max(0, Math.min(height - 1, yPos));
         
-        // Center line
-        var centerY = Math.floor(height / 2);
-        
-        if(y === centerY) {
-          line += '-'; // Center line
-        } else if(y === yPos) {
+        if(y === yPos) {
           line += '*'; // Waveform point
-        } else if(Math.abs(y - yPos) === 1 && y !== centerY) {
+        } else if(Math.abs(y - yPos) === 1) {
           line += '.'; // Near waveform
         } else {
           line += ' '; // Empty space
