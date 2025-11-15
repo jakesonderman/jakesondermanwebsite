@@ -94,7 +94,7 @@ var rightDataArray = null;
 
 // Waveform history buffer for long-term display
 var waveformHistory = [];
-var waveformHistorySize = 500; // Number of frames to keep
+var waveformHistorySize = 200; // Number of sample columns to keep
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -255,28 +255,28 @@ function visualize() {
       // WAVEFORM MODE - Long-term scrolling waveform
       analyser.getByteTimeDomainData(dataArray);
       
-      // Calculate average or center value for this frame
-      var sum = 0;
-      for(var i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-      }
-      var avgValue = sum / dataArray.length;
-      
-      // Add to history buffer
-      waveformHistory.push(avgValue);
-      if(waveformHistory.length > waveformHistorySize) {
-        waveformHistory.shift(); // Remove oldest
+      // Sample a few points from current frame and add to history
+      var samplesPerFrame = 5; // How many samples to take per frame
+      var step = Math.floor(dataArray.length / samplesPerFrame);
+      for(var s = 0; s < samplesPerFrame; s++) {
+        var sampleIndex = s * step;
+        if(sampleIndex < dataArray.length) {
+          waveformHistory.push(dataArray[sampleIndex]);
+          if(waveformHistory.length > waveformHistorySize) {
+            waveformHistory.shift(); // Remove oldest (scrolls left)
+          }
+        }
       }
       
       var width = 100;
       var height = 25;
       var output = '';
       
-      // Display the history scrolling left to right
+      // Display the history scrolling left to right (oldest left, newest right)
       for(var y = 0; y < height; y++) {
         var line = '';
         for(var x = 0; x < width; x++) {
-          // Map x to history index (most recent on right)
+          // Map x to history index (oldest on left, newest on right)
           var historyIndex = Math.floor((x / width) * waveformHistory.length);
           if(historyIndex < waveformHistory.length) {
             var value = waveformHistory[historyIndex];
@@ -396,6 +396,10 @@ function setChars(main, near) {
 
 function setMode(mode) {
   currentMode = mode;
+  // Clear waveform history when switching modes
+  if(mode !== 'waveform') {
+    waveformHistory = [];
+  }
 }
 
 function togglePlay() {
