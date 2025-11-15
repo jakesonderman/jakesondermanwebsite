@@ -163,12 +163,29 @@ function setupAudioContext() {
       
       // Connect audio element to analyser (this disconnects default output, so we reconnect)
       source = audioContext.createMediaElementSource(audioPlayer);
+      
+      // For stereometer, we need to split channels
+      splitter = audioContext.createChannelSplitter(2);
+      leftAnalyser = audioContext.createAnalyser();
+      rightAnalyser = audioContext.createAnalyser();
+      leftAnalyser.fftSize = 2048;
+      rightAnalyser.fftSize = 2048;
+      
+      source.connect(splitter);
+      splitter.connect(leftAnalyser, 0); // Left channel
+      splitter.connect(rightAnalyser, 1); // Right channel
+      
+      // Also connect to main analyser and destination
       source.connect(analyser);
       analyser.connect(audioContext.destination);
+      leftAnalyser.connect(audioContext.destination);
+      rightAnalyser.connect(audioContext.destination);
       
-      // Create data array for waveform data (time domain)
+      // Create data arrays for waveform data (time domain)
       var bufferLength = analyser.fftSize;
       dataArray = new Uint8Array(bufferLength);
+      leftDataArray = new Uint8Array(leftAnalyser.fftSize);
+      rightDataArray = new Uint8Array(rightAnalyser.fftSize);
       
       // Show visualizer and options
       scopeVisualizer.style.display = 'block';
