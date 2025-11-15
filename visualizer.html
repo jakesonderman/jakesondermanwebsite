@@ -103,9 +103,9 @@ var rightDataArray = null;
 
 // Waveform history buffer for long-term display
 var waveformHistory = [];
-var waveformHistorySize = 200; // Number of sample columns to keep
-var waveformTimeScale = 1; // Time scale divisor (1, 4, 8, 32, 64)
-var waveformFrameCounter = 0; // Counter for time scale sampling
+var baseHistorySize = 200; // Base number of sample columns to keep
+var waveformHistorySize = baseHistorySize; // Current history size (scaled by time scale)
+var waveformTimeScale = 1; // Time scale multiplier (1, 4, 8, 32, 64)
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -270,21 +270,16 @@ function visualize() {
       // WAVEFORM MODE - Long-term scrolling waveform
       analyser.getByteTimeDomainData(dataArray);
       
-      // Only sample based on time scale (skip frames for longer time periods)
-      waveformFrameCounter++;
-      if(waveformFrameCounter >= waveformTimeScale) {
-        waveformFrameCounter = 0;
-        
-        // Sample a few points from current frame and add to history
-        var samplesPerFrame = 5; // How many samples to take per frame
-        var step = Math.floor(dataArray.length / samplesPerFrame);
-        for(var s = 0; s < samplesPerFrame; s++) {
-          var sampleIndex = s * step;
-          if(sampleIndex < dataArray.length) {
-            waveformHistory.push(dataArray[sampleIndex]);
-            if(waveformHistory.length > waveformHistorySize) {
-              waveformHistory.shift(); // Remove oldest (scrolls left)
-            }
+      // Sample a few points from current frame and add to history (always sample at same rate)
+      var samplesPerFrame = 5; // How many samples to take per frame
+      var step = Math.floor(dataArray.length / samplesPerFrame);
+      for(var s = 0; s < samplesPerFrame; s++) {
+        var sampleIndex = s * step;
+        if(sampleIndex < dataArray.length) {
+          waveformHistory.push(dataArray[sampleIndex]);
+          // Keep more history based on time scale (scrolls at same speed, shows longer period)
+          if(waveformHistory.length > waveformHistorySize) {
+            waveformHistory.shift(); // Remove oldest (scrolls left)
           }
         }
       }
@@ -420,7 +415,6 @@ function setMode(mode) {
   // Clear waveform history when switching modes
   if(mode !== 'waveform') {
     waveformHistory = [];
-    waveformFrameCounter = 0;
     document.getElementById('waveformTimeScale').style.display = 'none';
   } else {
     document.getElementById('waveformTimeScale').style.display = 'block';
@@ -429,7 +423,12 @@ function setMode(mode) {
 
 function setTimeScale(scale) {
   waveformTimeScale = scale;
-  waveformFrameCounter = 0; // Reset counter
+  // Increase history buffer size to show longer time period (scrolls at same speed)
+  waveformHistorySize = baseHistorySize * scale;
+  // Trim history if it's now larger than the new size
+  while(waveformHistory.length > waveformHistorySize) {
+    waveformHistory.shift();
+  }
 }
 
 function togglePlay() {
