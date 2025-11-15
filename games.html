@@ -88,9 +88,242 @@ anim3();
 </SCRIPT>
 </CENTER>
 <BR><BR>
+<FONT SIZE="+2" FACE="Courier" COLOR="#000000"><B>JEREMY RUNNER</B></FONT>
+<BR><BR>
 <FONT SIZE="+1" FACE="Times" COLOR="#000000">
-Games coming soon!
+Press SPACE to jump! Avoid the obstacles!
 </FONT>
+<BR><BR>
+<DIV STYLE="background-color: #F0F0F0; border: 3px solid #000000; padding: 20px; text-align: left; position: relative; overflow: hidden;">
+<PRE ID="gameCanvas" STYLE="font-family: Courier; font-size: 14px; line-height: 1.2; margin: 0; height: 200px;"></PRE>
+</DIV>
+<BR>
+<CENTER>
+<DIV ID="score" STYLE="font-family: Courier; font-size: 18px; font-weight: bold;">SCORE: 0</DIV>
+<DIV ID="gameOver" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #FF0000; display: none;">GAME OVER! Press SPACE to restart</DIV>
+</CENTER>
+<SCRIPT>
+// Game configuration
+var canvas = document.getElementById('gameCanvas');
+var scoreDisplay = document.getElementById('score');
+var gameOverDisplay = document.getElementById('gameOver');
+
+var gameWidth = 70;
+var gameHeight = 12;
+var gameRunning = false;
+var score = 0;
+var gameSpeed = 150;
+
+// Jeremy the cat (player)
+var jeremy = {
+  x: 5,
+  y: 9,
+  jumping: false,
+  jumpHeight: 0,
+  jumpSpeed: 0,
+  maxJumpHeight: 5,
+  sprite: [
+    ' |\\---/|',
+    ' | o_o |',
+    '  \\_^_/ '
+  ],
+  spriteJump: [
+    ' |\\---/|',
+    ' | ^_^ |',
+    '  \\_^_/ '
+  ]
+};
+
+// Obstacles
+var obstacles = [];
+var obstacleSpawnTimer = 0;
+var obstacleSpawnInterval = 20;
+
+// Obstacle types
+var obstacleTypes = [
+  ['  ###  ', '  ###  ', '######'],  // Box
+  [' /^\\ ', '/   \\', '-----'],      // Pyramid
+  ['  ||  ', '  ||  ', '======']     // Post
+];
+
+function initGame() {
+  gameRunning = true;
+  score = 0;
+  obstacles = [];
+  obstacleSpawnTimer = 0;
+  jeremy.y = 9;
+  jeremy.jumping = false;
+  jeremy.jumpHeight = 0;
+  jeremy.jumpSpeed = 0;
+  gameOverDisplay.style.display = 'none';
+  gameLoop();
+}
+
+function createObstacle() {
+  var type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+  obstacles.push({
+    x: gameWidth,
+    y: 9,
+    width: 6,
+    height: 3,
+    sprite: type
+  });
+}
+
+function updateGame() {
+  if (!gameRunning) return;
+
+  // Update Jeremy's jump
+  if (jeremy.jumping) {
+    jeremy.jumpSpeed += 0.5;
+    jeremy.jumpHeight += jeremy.jumpSpeed;
+    
+    if (jeremy.jumpHeight >= jeremy.maxJumpHeight) {
+      jeremy.jumping = false;
+    }
+  } else if (jeremy.jumpHeight > 0) {
+    jeremy.jumpHeight -= 1;
+    if (jeremy.jumpHeight <= 0) {
+      jeremy.jumpHeight = 0;
+    }
+  }
+
+  // Update obstacles
+  obstacleSpawnTimer++;
+  if (obstacleSpawnTimer >= obstacleSpawnInterval) {
+    createObstacle();
+    obstacleSpawnTimer = 0;
+    // Gradually increase difficulty
+    if (obstacleSpawnInterval > 12) {
+      obstacleSpawnInterval -= 0.1;
+    }
+  }
+
+  for (var i = obstacles.length - 1; i >= 0; i--) {
+    obstacles[i].x -= 2;
+    
+    // Remove off-screen obstacles
+    if (obstacles[i].x < -obstacles[i].width) {
+      obstacles.splice(i, 1);
+      score += 10;
+      scoreDisplay.textContent = 'SCORE: ' + score;
+      continue;
+    }
+
+    // Check collision
+    if (checkCollision(jeremy, obstacles[i])) {
+      gameRunning = false;
+      gameOverDisplay.style.display = 'block';
+      return;
+    }
+  }
+}
+
+function checkCollision(player, obstacle) {
+  var playerLeft = player.x;
+  var playerRight = player.x + 8;
+  var playerTop = player.y - player.jumpHeight;
+  var playerBottom = playerTop + 3;
+
+  var obsLeft = obstacle.x;
+  var obsRight = obstacle.x + obstacle.width;
+  var obsTop = obstacle.y - obstacle.height + 1;
+  var obsBottom = obstacle.y + 1;
+
+  return playerRight > obsLeft && 
+         playerLeft < obsRight && 
+         playerBottom > obsTop && 
+         playerTop < obsBottom;
+}
+
+function renderGame() {
+  var buffer = [];
+  
+  // Create empty canvas
+  for (var i = 0; i < gameHeight; i++) {
+    buffer[i] = [];
+    for (var j = 0; j < gameWidth; j++) {
+      buffer[i][j] = ' ';
+    }
+  }
+
+  // Draw ground
+  for (var i = 0; i < gameWidth; i++) {
+    buffer[gameHeight - 1][i] = '=';
+  }
+
+  // Draw Jeremy
+  var jeremySprite = jeremy.jumpHeight > 0 ? jeremy.spriteJump : jeremy.sprite;
+  var jeremyY = jeremy.y - jeremy.jumpHeight;
+  for (var i = 0; i < jeremySprite.length; i++) {
+    var line = jeremySprite[i];
+    for (var j = 0; j < line.length; j++) {
+      var y = jeremyY - 2 + i;
+      var x = jeremy.x + j;
+      if (y >= 0 && y < gameHeight && x >= 0 && x < gameWidth) {
+        buffer[y][x] = line[j];
+      }
+    }
+  }
+
+  // Draw obstacles
+  for (var o = 0; o < obstacles.length; o++) {
+    var obs = obstacles[o];
+    for (var i = 0; i < obs.sprite.length; i++) {
+      var line = obs.sprite[i];
+      for (var j = 0; j < line.length; j++) {
+        var y = obs.y - obs.height + 1 + i;
+        var x = obs.x + j;
+        if (y >= 0 && y < gameHeight && x >= 0 && x < gameWidth && line[j] !== ' ') {
+          buffer[y][x] = line[j];
+        }
+      }
+    }
+  }
+
+  // Convert buffer to string
+  var output = '';
+  for (var i = 0; i < gameHeight; i++) {
+    output += buffer[i].join('') + '\n';
+  }
+  
+  canvas.textContent = output;
+}
+
+function gameLoop() {
+  if (gameRunning) {
+    updateGame();
+    renderGame();
+    setTimeout(gameLoop, gameSpeed);
+  } else {
+    renderGame();
+  }
+}
+
+// Jump control
+function jump() {
+  if (!gameRunning) {
+    initGame();
+    return;
+  }
+  
+  if (jeremy.jumpHeight === 0 && !jeremy.jumping) {
+    jeremy.jumping = true;
+    jeremy.jumpSpeed = -2;
+  }
+}
+
+// Keyboard controls
+document.addEventListener('keydown', function(e) {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    jump();
+  }
+});
+
+// Start the game
+initGame();
+</SCRIPT>
 </TD>
 </TR>
 </TABLE>
