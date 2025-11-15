@@ -276,13 +276,13 @@ function visualize() {
         var L = (leftDataArray[i] - 128) / 128;
         var R = (rightDataArray[i] - 128) / 128;
         
-        // Stereometer formula: X = L+R (sum/mono), Y = L-R (difference/stereo)
-        var sum = L + R; // Mono component (horizontal axis)
-        var diff = L - R; // Stereo component (vertical axis)
+        // Stereometer formula: Rotated - X = L-R (difference/stereo), Y = L+R (sum/mono)
+        var diff = L - R; // Stereo component (horizontal axis)
+        var sum = L + R; // Mono component (vertical axis)
         
-        // Map to display coordinates (center is origin)
-        var plotX = centerX + (sum * maxRadius);
-        var plotY = centerY - (diff * maxRadius); // Invert Y for display
+        // Map to display coordinates (center is origin) - rotated for vertical circle
+        var plotX = centerX + (diff * maxRadius); // Horizontal = stereo difference
+        var plotY = centerY - (sum * maxRadius); // Vertical = mono sum (inverted for display)
         
         // Clamp to bounds
         plotX = Math.max(0, Math.min(width - 1, Math.floor(plotX)));
