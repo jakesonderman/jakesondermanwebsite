@@ -247,66 +247,73 @@ function visualize() {
       
       scopeVisualizer.textContent = output;
     } else if(currentMode === 'stereo') {
-      // STEREOMETER MODE - Circular/radial correlation display
+      // STEREOMETER MODE - Circular/radial correlation display (L+R vs L-R)
       if(!leftAnalyser || !rightAnalyser || !leftDataArray || !rightDataArray) return;
       
       leftAnalyser.getByteTimeDomainData(leftDataArray);
       rightAnalyser.getByteTimeDomainData(rightDataArray);
       
-      var size = 50; // Circular display size
-      var centerX = size / 2;
-      var centerY = size / 2;
-      var radius = size / 2 - 2;
+      var width = 80;
+      var height = 25;
+      var centerX = width / 2;
+      var centerY = height / 2;
+      var maxRadius = Math.min(centerX, centerY) - 1;
       var output = '';
       
-      // Create circular grid
-      for(var y = 0; y < size; y++) {
+      // Create grid and plot correlation points
+      var grid = [];
+      for(var y = 0; y < height; y++) {
+        grid[y] = [];
+        for(var x = 0; x < width; x++) {
+          grid[y][x] = 0;
+        }
+      }
+      
+      // Plot multiple samples for smoother, cooler visualization
+      var sampleStep = Math.max(1, Math.floor(leftDataArray.length / 200));
+      for(var i = 0; i < leftDataArray.length; i += sampleStep) {
+        // Get L and R values (normalize from 0-255 to -1 to 1)
+        var L = (leftDataArray[i] - 128) / 128;
+        var R = (rightDataArray[i] - 128) / 128;
+        
+        // Stereometer formula: X = L+R (sum/mono), Y = L-R (difference/stereo)
+        var sum = L + R; // Mono component (horizontal axis)
+        var diff = L - R; // Stereo component (vertical axis)
+        
+        // Map to display coordinates (center is origin)
+        var plotX = centerX + (sum * maxRadius);
+        var plotY = centerY - (diff * maxRadius); // Invert Y for display
+        
+        // Clamp to bounds
+        plotX = Math.max(0, Math.min(width - 1, Math.floor(plotX)));
+        plotY = Math.max(0, Math.min(height - 1, Math.floor(plotY)));
+        
+        // Accumulate intensity at this point
+        grid[plotY][plotX] += 1;
+      }
+      
+      // Render the grid
+      var maxIntensity = 0;
+      for(var y = 0; y < height; y++) {
+        for(var x = 0; x < width; x++) {
+          if(grid[y][x] > maxIntensity) maxIntensity = grid[y][x];
+        }
+      }
+      
+      for(var y = 0; y < height; y++) {
         var line = '';
-        for(var x = 0; x < size; x++) {
-          var dx = x - centerX;
-          var dy = y - centerY;
-          var dist = Math.sqrt(dx * dx + dy * dy);
-          
-          // Draw circle outline
-          if(Math.abs(dist - radius) < 0.5) {
-            line += 'O';
-          } else if(dist < radius) {
-            // Inside circle - calculate stereo correlation
-            var angle = Math.atan2(dy, dx);
-            
-            // Map angle to sample index
-            var sampleIndex = Math.floor(((angle + Math.PI) / (2 * Math.PI)) * Math.min(leftDataArray.length, rightDataArray.length));
-            sampleIndex = Math.max(0, Math.min(sampleIndex, leftDataArray.length - 1));
-            
-            // Get L and R values (normalize from 0-255 to -1 to 1)
-            var L = (leftDataArray[sampleIndex] - 128) / 128;
-            var R = (rightDataArray[sampleIndex] - 128) / 128;
-            
-            // Stereometer formula: X = L+R (sum/mono), Y = L-R (difference/stereo)
-            var sum = L + R; // Mono component (horizontal)
-            var diff = L - R; // Stereo component (vertical)
-            
-            // Calculate expected position based on correlation
-            var expectedX = sum * radius;
-            var expectedY = diff * radius;
-            var expectedDist = Math.sqrt(expectedX * expectedX + expectedY * expectedY);
-            
-            // Check if this pixel should show the correlation point
-            var pixelDist = Math.sqrt((x - centerX - expectedX) * (x - centerX - expectedX) + (y - centerY - expectedY) * (y - centerY - expectedY));
-            
-            if(pixelDist < 1) {
+        for(var x = 0; x < width; x++) {
+          var intensity = grid[y][x];
+          if(intensity > 0) {
+            var normalized = intensity / Math.max(1, maxIntensity);
+            if(normalized > 0.7) {
               line += mainChar;
-            } else if(pixelDist < 2) {
+            } else if(normalized > 0.4) {
               line += nearChar;
+            } else if(normalized > 0.2) {
+              line += ':';
             } else {
-              // Draw grid lines
-              if(Math.abs(dx) < 0.5) {
-                line += '|'; // Vertical center line
-              } else if(Math.abs(dy) < 0.5) {
-                line += '-'; // Horizontal center line
-              } else {
-                line += ' ';
-              }
+              line += '.';
             }
           } else {
             line += ' ';
