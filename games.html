@@ -206,9 +206,9 @@ function updateGame() {
   if (obstacleSpawnTimer >= obstacleSpawnInterval) {
     createObstacle();
     obstacleSpawnTimer = 0;
-    // Gradually increase difficulty
-    if (obstacleSpawnInterval > 35) {
-      obstacleSpawnInterval -= 0.1;
+    // Gradually increase difficulty - spawn obstacles more frequently
+    if (obstacleSpawnInterval > 30) {
+      obstacleSpawnInterval -= 0.5;  // Faster difficulty ramp
     }
   }
 
@@ -233,18 +233,19 @@ function updateGame() {
 }
 
 function checkCollision(player, obstacle) {
-  // Much smaller hitboxes for more forgiving gameplay
-  var hitboxPadding = 2;  // Shrink hitboxes by 2 pixels on each side
+  // Slightly smaller hitboxes for more forgiving gameplay
+  var playerPadding = 1;  // Make Jeremy's hitbox slightly smaller
+  var obsPadding = 1;     // Make obstacle hitbox slightly smaller
   
-  var playerLeft = player.x + hitboxPadding;
-  var playerRight = player.x + 8 - hitboxPadding;
-  var playerTop = player.y - player.jumpHeight + hitboxPadding;
-  var playerBottom = playerTop + 3 - hitboxPadding;
+  var playerLeft = player.x + playerPadding;
+  var playerRight = player.x + 7 - playerPadding;  // Jeremy is about 8 chars wide
+  var playerTop = player.y - player.jumpHeight + playerPadding;
+  var playerBottom = playerTop + 2 - playerPadding;  // Jeremy is 3 lines tall
 
-  var obsLeft = obstacle.x + hitboxPadding;
-  var obsRight = obstacle.x + obstacle.width - hitboxPadding;
-  var obsTop = obstacle.y - obstacle.height + 1 + hitboxPadding;
-  var obsBottom = obstacle.y + 1 - hitboxPadding;
+  var obsLeft = obstacle.x + obsPadding;
+  var obsRight = obstacle.x + obstacle.width - obsPadding;
+  var obsTop = obstacle.y - obstacle.height + 1;
+  var obsBottom = obstacle.y;
 
   return playerRight > obsLeft && 
          playerLeft < obsRight && 
@@ -319,7 +320,7 @@ function renderGame() {
   
   // Update debug info
   if (debugDisplay) {
-    debugDisplay.textContent = 'Obstacles: ' + obstacles.length + ' | Jump Height: ' + jeremy.jumpHeight + ' | Jumping: ' + jeremy.jumping;
+    debugDisplay.textContent = 'Obstacles: ' + obstacles.length + ' | Jump: ' + jeremy.jumpHeight + ' | Spawn Rate: ' + Math.floor(obstacleSpawnInterval);
   }
 }
 
