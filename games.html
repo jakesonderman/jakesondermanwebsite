@@ -239,13 +239,13 @@ function checkCollision(player, obstacle) {
   
   var playerLeft = player.x + playerPadding;
   var playerRight = player.x + 7 - playerPadding;  // Jeremy is about 8 chars wide
-  var playerTop = player.y - player.jumpHeight + playerPadding;
-  var playerBottom = playerTop + 2 - playerPadding;  // Jeremy is 3 lines tall
+  var playerTop = player.y - player.jumpHeight - 2;  // Top of Jeremy (3 lines tall)
+  var playerBottom = player.y - player.jumpHeight + 1;  // Bottom extends to ground
 
   var obsLeft = obstacle.x + obsPadding;
   var obsRight = obstacle.x + obstacle.width - obsPadding;
   var obsTop = obstacle.y - obstacle.height + 1;
-  var obsBottom = obstacle.y;
+  var obsBottom = obstacle.y + 1;  // Ground level
 
   return playerRight > obsLeft && 
          playerLeft < obsRight && 
