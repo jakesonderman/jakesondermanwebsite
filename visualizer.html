@@ -287,11 +287,14 @@ function visualize() {
       
       // Display the history scrolling left to right (oldest left, newest right)
       // Each column represents a captured value that doesn't change as it scrolls
+      // Map the most recent 'width' values to the display columns (1:1 mapping)
+      var startIndex = Math.max(0, waveformHistory.length - width);
+      
       for(var y = 0; y < height; y++) {
         var line = '';
         for(var x = 0; x < width; x++) {
-          // Map x to history index (oldest on left, newest on right)
-          var historyIndex = Math.floor((x / width) * waveformHistory.length);
+          // Direct 1:1 mapping: column x maps to history[startIndex + x]
+          var historyIndex = startIndex + x;
           if(historyIndex < waveformHistory.length) {
             var value = waveformHistory[historyIndex];
             var normalizedValue = ((value - 128) / 128) * (height / 2);
