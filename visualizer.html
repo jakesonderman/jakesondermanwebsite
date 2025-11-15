@@ -46,10 +46,6 @@ Your browser does not support the audio element.
 <INPUT TYPE="BUTTON" VALUE="HASH (#)" ONCLICK="setChars('#', '+')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="AT (@)" ONCLICK="setChars('@', 'O')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="EQUALS (=)" ONCLICK="setChars('=', '-')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<BR><BR>
-<FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>VISUALIZER MODE:</B></FONT><BR>
-<INPUT TYPE="BUTTON" VALUE="SCOPE" ONCLICK="setMode('scope')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<INPUT TYPE="BUTTON" VALUE="STEREOMETER" ONCLICK="setMode('stereo')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 </DIV>
 <BR><BR>
 <PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 10px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.1;"></PRE>
@@ -84,9 +80,6 @@ var source = null;
 var currentColor = '#000000';
 var mainChar = '*';
 var nearChar = '.';
-var currentMode = 'scope'; // 'scope' or 'stereo'
-var leftDataArray = null;
-var rightDataArray = null;
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -163,11 +156,9 @@ function setupAudioContext() {
       source.connect(analyser);
       analyser.connect(audioContext.destination);
       
-      // Create data arrays for waveform data (time domain)
+      // Create data array for waveform data (time domain)
       var bufferLength = analyser.fftSize;
       dataArray = new Uint8Array(bufferLength);
-      leftDataArray = new Uint8Array(bufferLength);
-      rightDataArray = new Uint8Array(bufferLength);
       
       // Show visualizer and options
       scopeVisualizer.style.display = 'block';
@@ -199,103 +190,40 @@ function visualize() {
     
     if(!analyser || !dataArray) return;
     
-    if(currentMode === 'scope') {
-      // SCOPE MODE - Single waveform
-      analyser.getByteTimeDomainData(dataArray);
-      
-      var width = 100;
-      var height = 25;
-      var output = '';
-      
-      for(var y = 0; y < height; y++) {
-        var line = '';
-        for(var x = 0; x < width; x++) {
-          var dataIndex = Math.floor((x / width) * dataArray.length);
-          var value = dataArray[dataIndex];
-          var normalizedValue = ((value - 128) / 128) * (height / 2);
-          var yPos = Math.floor((height / 2) - normalizedValue);
-          yPos = Math.max(0, Math.min(height - 1, yPos));
-          
-          if(y === yPos) {
-            line += mainChar;
-          } else if(Math.abs(y - yPos) === 1) {
-            line += nearChar;
-          } else {
-            line += ' ';
-          }
+    // Get waveform data (time domain - actual audio buffer samples)
+    analyser.getByteTimeDomainData(dataArray);
+    
+    // Create ASCII scope visualization - extended to edges
+    var width = 100;
+    var height = 25;
+    var output = '';
+    
+    // Create grid
+    for(var y = 0; y < height; y++) {
+      var line = '';
+      for(var x = 0; x < width; x++) {
+        // Map x to dataArray index
+        var dataIndex = Math.floor((x / width) * dataArray.length);
+        var value = dataArray[dataIndex];
+        
+        // Normalize value (0-255, where 128 is center) to height
+        // Value 128 = center, 0 = bottom, 255 = top
+        var normalizedValue = ((value - 128) / 128) * (height / 2);
+        var yPos = Math.floor((height / 2) - normalizedValue);
+        yPos = Math.max(0, Math.min(height - 1, yPos));
+        
+        if(y === yPos) {
+          line += mainChar; // Waveform point
+        } else if(Math.abs(y - yPos) === 1) {
+          line += nearChar; // Near waveform
+        } else {
+          line += ' '; // Empty space
         }
-        output += line + '\n';
       }
-      
-      scopeVisualizer.textContent = output;
-    } else if(currentMode === 'stereo') {
-      // STEREOMETER MODE - Left and Right channels side by side
-      analyser.getByteTimeDomainData(dataArray);
-      
-      // Split stereo: even indices = left, odd indices = right
-      // Or use the full buffer and assume interleaved stereo
-      var bufferLength = dataArray.length;
-      for(var i = 0; i < bufferLength; i += 2) {
-        if(i < bufferLength) leftDataArray[i/2] = dataArray[i];
-        if(i+1 < bufferLength) rightDataArray[i/2] = dataArray[i+1];
-      }
-      
-      var width = 48; // Half width for each channel
-      var height = 25;
-      var output = '';
-      
-      // Header labels
-      output += 'L' + ' '.repeat(width-1) + '|' + ' '.repeat(width-1) + 'R\n';
-      output += '-'.repeat(width) + '|' + '-'.repeat(width) + '\n';
-      
-      for(var y = 0; y < height; y++) {
-        var line = '';
-        
-        // Left channel
-        for(var x = 0; x < width; x++) {
-          var dataIndex = Math.floor((x / width) * (bufferLength / 2));
-          if(dataIndex >= leftDataArray.length) dataIndex = leftDataArray.length - 1;
-          var value = leftDataArray[dataIndex] || 128;
-          var normalizedValue = ((value - 128) / 128) * (height / 2);
-          var yPos = Math.floor((height / 2) - normalizedValue);
-          yPos = Math.max(0, Math.min(height - 1, yPos));
-          
-          if(y === yPos) {
-            line += mainChar;
-          } else if(Math.abs(y - yPos) === 1) {
-            line += nearChar;
-          } else {
-            line += ' ';
-          }
-        }
-        
-        // Separator
-        line += '|';
-        
-        // Right channel
-        for(var x = 0; x < width; x++) {
-          var dataIndex = Math.floor((x / width) * (bufferLength / 2));
-          if(dataIndex >= rightDataArray.length) dataIndex = rightDataArray.length - 1;
-          var value = rightDataArray[dataIndex] || 128;
-          var normalizedValue = ((value - 128) / 128) * (height / 2);
-          var yPos = Math.floor((height / 2) - normalizedValue);
-          yPos = Math.max(0, Math.min(height - 1, yPos));
-          
-          if(y === yPos) {
-            line += mainChar;
-          } else if(Math.abs(y - yPos) === 1) {
-            line += nearChar;
-          } else {
-            line += ' ';
-          }
-        }
-        
-        output += line + '\n';
-      }
-      
-      scopeVisualizer.textContent = output;
+      output += line + '\n';
     }
     
+    scopeVisualizer.textContent = output;
     scopeVisualizer.style.color = currentColor;
   }
   
@@ -310,10 +238,6 @@ function setColor(color) {
 function setChars(main, near) {
   mainChar = main;
   nearChar = near;
-}
-
-function setMode(mode) {
-  currentMode = mode;
 }
 
 function togglePlay() {
