@@ -287,15 +287,16 @@ function visualize() {
       
       // Display the history scrolling left to right (oldest left, newest right)
       // Each column represents a captured value that doesn't change as it scrolls
-      // Map the most recent 'width' values to the display columns (1:1 mapping)
-      var startIndex = Math.max(0, waveformHistory.length - width);
+      // If history is larger than width, sample from it to show the full history span
+      var historyLength = waveformHistory.length;
+      var sampleStep = Math.max(1, Math.floor(historyLength / width));
       
       for(var y = 0; y < height; y++) {
         var line = '';
         for(var x = 0; x < width; x++) {
-          // Direct 1:1 mapping: column x maps to history[startIndex + x]
-          var historyIndex = startIndex + x;
-          if(historyIndex < waveformHistory.length) {
+          // Map column x to history index, sampling if needed to show full history
+          var historyIndex = Math.floor((x / width) * historyLength);
+          if(historyIndex < historyLength) {
             var value = waveformHistory[historyIndex];
             var normalizedValue = ((value - 128) / 128) * (height / 2);
             var yPos = Math.floor((height / 2) - normalizedValue);
