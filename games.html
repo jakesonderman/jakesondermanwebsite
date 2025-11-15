@@ -39,7 +39,7 @@ bgAnim();
 <CENTER>
 <TABLE WIDTH="90%" BORDER="3" CELLPADDING="10" CELLSPACING="5" BGCOLOR="#FFFFFF">
 <TR>
-<TD ALIGN="CENTER" COLSPAN="4">
+<TD ALIGN="CENTER" COLSPAN="5">
 <FONT SIZE="+3" FACE="Courier" COLOR="#000000"><B>JAKE SONDERMAN</B></FONT>
 </TD>
 </TR>
@@ -52,6 +52,9 @@ bgAnim();
 </TD>
 <TD ALIGN="CENTER">
 <FONT SIZE="+1" COLOR="#000000"><A HREF="jeremy.html">JEREMY</A></FONT>
+</TD>
+<TD ALIGN="CENTER">
+<FONT SIZE="+1" COLOR="#000000"><A HREF="visualizer.html">VISUALIZER</A></FONT>
 </TD>
 <TD ALIGN="CENTER">
 <FONT SIZE="+1" COLOR="#000000"><A HREF="contact.html">CONTACT</A></FONT>
@@ -180,18 +183,20 @@ function createObstacle() {
 function updateGame() {
   if (!gameRunning) return;
 
-  // Update Jeremy's jump
-  if (jeremy.jumping) {
-    jeremy.jumpSpeed += 0.5;
-    jeremy.jumpHeight += jeremy.jumpSpeed;
-    
-    if (jeremy.jumpHeight >= jeremy.maxJumpHeight) {
-      jeremy.jumping = false;
-    }
-  } else if (jeremy.jumpHeight > 0) {
-    jeremy.jumpHeight -= 1;
-    if (jeremy.jumpHeight <= 0) {
-      jeremy.jumpHeight = 0;
+  // Update Jeremy's jump - simple arc physics
+  if (jeremy.jumpHeight > 0 || jeremy.jumping) {
+    if (jeremy.jumping) {
+      // Going up
+      jeremy.jumpHeight += 1;
+      if (jeremy.jumpHeight >= jeremy.maxJumpHeight) {
+        jeremy.jumping = false;
+      }
+    } else {
+      // Coming down
+      jeremy.jumpHeight -= 1;
+      if (jeremy.jumpHeight <= 0) {
+        jeremy.jumpHeight = 0;
+      }
     }
   }
 
@@ -327,7 +332,6 @@ function jump() {
   
   if (jeremy.jumpHeight === 0 && !jeremy.jumping) {
     jeremy.jumping = true;
-    jeremy.jumpSpeed = -2;
   }
 }
 
