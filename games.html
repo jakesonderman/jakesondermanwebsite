@@ -91,7 +91,7 @@ anim3();
 <FONT SIZE="+2" FACE="Courier" COLOR="#000000"><B>JEREMY RUNNER</B></FONT>
 <BR><BR>
 <FONT SIZE="+1" FACE="Times" COLOR="#000000">
-Press SPACE to jump! Avoid the obstacles!
+Press ENTER to start! Press SPACE to jump! Avoid the obstacles!
 </FONT>
 <BR><BR>
 <DIV STYLE="background-color: #F0F0F0; border: 3px solid #000000; padding: 20px; text-align: left; position: relative; overflow: hidden;">
@@ -100,17 +100,20 @@ Press SPACE to jump! Avoid the obstacles!
 <BR>
 <CENTER>
 <DIV ID="score" STYLE="font-family: Courier; font-size: 18px; font-weight: bold;">SCORE: 0</DIV>
-<DIV ID="gameOver" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #FF0000; display: none;">GAME OVER! Press SPACE to restart</DIV>
+<DIV ID="startMessage" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #0000FF;">PRESS ENTER TO START</DIV>
+<DIV ID="gameOver" STYLE="font-family: Courier; font-size: 18px; font-weight: bold; color: #FF0000; display: none;">GAME OVER! Press ENTER to restart</DIV>
 </CENTER>
 <SCRIPT>
 // Game configuration
 var canvas = document.getElementById('gameCanvas');
 var scoreDisplay = document.getElementById('score');
 var gameOverDisplay = document.getElementById('gameOver');
+var startMessageDisplay = document.getElementById('startMessage');
 
 var gameWidth = 70;
 var gameHeight = 12;
 var gameRunning = false;
+var gameStarted = false;
 var score = 0;
 var gameSpeed = 150;
 
@@ -148,14 +151,18 @@ var obstacleTypes = [
 
 function initGame() {
   gameRunning = true;
+  gameStarted = true;
   score = 0;
   obstacles = [];
   obstacleSpawnTimer = 0;
+  obstacleSpawnInterval = 20;
   jeremy.y = 9;
   jeremy.jumping = false;
   jeremy.jumpHeight = 0;
   jeremy.jumpSpeed = 0;
   gameOverDisplay.style.display = 'none';
+  startMessageDisplay.style.display = 'none';
+  scoreDisplay.textContent = 'SCORE: 0';
   gameLoop();
 }
 
@@ -252,6 +259,18 @@ function renderGame() {
     buffer[gameHeight - 1][i] = '=';
   }
 
+  // If game hasn't started, show start message in canvas
+  if (!gameStarted) {
+    var startMsg = 'PRESS ENTER TO START!';
+    var startX = Math.floor((gameWidth - startMsg.length) / 2);
+    var startY = Math.floor(gameHeight / 2);
+    for (var i = 0; i < startMsg.length; i++) {
+      if (startX + i >= 0 && startX + i < gameWidth) {
+        buffer[startY][startX + i] = startMsg[i];
+      }
+    }
+  }
+
   // Draw Jeremy
   var jeremySprite = jeremy.jumpHeight > 0 ? jeremy.spriteJump : jeremy.sprite;
   var jeremyY = jeremy.y - jeremy.jumpHeight;
@@ -302,8 +321,7 @@ function gameLoop() {
 
 // Jump control
 function jump() {
-  if (!gameRunning) {
-    initGame();
+  if (!gameRunning || !gameStarted) {
     return;
   }
   
@@ -313,16 +331,26 @@ function jump() {
   }
 }
 
+// Start/Restart game
+function startGame() {
+  if (!gameStarted || !gameRunning) {
+    initGame();
+  }
+}
+
 // Keyboard controls
 document.addEventListener('keydown', function(e) {
-  if (e.code === 'Space') {
+  if (e.code === 'Enter') {
+    e.preventDefault();
+    startGame();
+  } else if (e.code === 'Space') {
     e.preventDefault();
     jump();
   }
 });
 
-// Start the game
-initGame();
+// Initialize display
+renderGame();
 </SCRIPT>
 </TD>
 </TR>
