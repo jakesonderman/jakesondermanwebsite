@@ -51,15 +51,6 @@ Your browser does not support the audio element.
 <INPUT TYPE="BUTTON" VALUE="SCOPE" ONCLICK="setMode('scope')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="WAVEFORM" ONCLICK="setMode('waveform')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="STEREOMETER" ONCLICK="setMode('stereo')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<BR><BR>
-<DIV ID="waveformTimeScale" STYLE="display: none;">
-<FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>TIME SCALE:</B></FONT><BR>
-<INPUT TYPE="BUTTON" VALUE="1x" ONCLICK="setTimeScale(1)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<INPUT TYPE="BUTTON" VALUE="/4" ONCLICK="setTimeScale(4)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<INPUT TYPE="BUTTON" VALUE="/8" ONCLICK="setTimeScale(8)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<INPUT TYPE="BUTTON" VALUE="/32" ONCLICK="setTimeScale(32)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-<INPUT TYPE="BUTTON" VALUE="/64" ONCLICK="setTimeScale(64)" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
-</DIV>
 </DIV>
 <BR><BR>
 <PRE ID="scopeVisualizer" STYLE="font-family: Courier; font-size: 10px; background-color: #FFFFFF; color: #000000; padding: 10px; margin: 20px auto; width: 90%; max-width: 800px; height: 300px; overflow: hidden; display: none; border: 2px solid #000000; line-height: 1.1;"></PRE>
@@ -103,9 +94,7 @@ var rightDataArray = null;
 
 // Waveform history buffer for long-term display
 var waveformHistory = [];
-var baseHistorySize = 200; // Base number of sample columns to keep
-var waveformHistorySize = baseHistorySize; // Current history size (scaled by time scale)
-var waveformTimeScale = 1; // Time scale multiplier (1, 4, 8, 32, 64)
+var waveformHistorySize = 200; // Number of sample columns to keep
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -206,10 +195,6 @@ function setupAudioContext() {
       // Show visualizer and options
       scopeVisualizer.style.display = 'block';
       document.getElementById('visualizerOptions').style.display = 'block';
-      // Show time scale options if in waveform mode
-      if(currentMode === 'waveform') {
-        document.getElementById('waveformTimeScale').style.display = 'block';
-      }
       
       // Start visualization loop
       visualize();
@@ -287,16 +272,15 @@ function visualize() {
       
       // Display the history scrolling left to right (oldest left, newest right)
       // Each column represents a captured value that doesn't change as it scrolls
-      // If history is larger than width, sample from it to show the full history span
-      var historyLength = waveformHistory.length;
-      var sampleStep = Math.max(1, Math.floor(historyLength / width));
+      // Map the most recent 'width' values to the display columns (1:1 mapping)
+      var startIndex = Math.max(0, waveformHistory.length - width);
       
       for(var y = 0; y < height; y++) {
         var line = '';
         for(var x = 0; x < width; x++) {
-          // Map column x to history index, sampling if needed to show full history
-          var historyIndex = Math.floor((x / width) * historyLength);
-          if(historyIndex < historyLength) {
+          // Direct 1:1 mapping: column x maps to history[startIndex + x]
+          var historyIndex = startIndex + x;
+          if(historyIndex < waveformHistory.length) {
             var value = waveformHistory[historyIndex];
             var normalizedValue = ((value - 128) / 128) * (height / 2);
             var yPos = Math.floor((height / 2) - normalizedValue);
@@ -417,19 +401,6 @@ function setMode(mode) {
   // Clear waveform history when switching modes
   if(mode !== 'waveform') {
     waveformHistory = [];
-    document.getElementById('waveformTimeScale').style.display = 'none';
-  } else {
-    document.getElementById('waveformTimeScale').style.display = 'block';
-  }
-}
-
-function setTimeScale(scale) {
-  waveformTimeScale = scale;
-  // Increase history buffer size to show longer time period (scrolls at same speed)
-  waveformHistorySize = baseHistorySize * scale;
-  // Trim history if it's now larger than the new size
-  while(waveformHistory.length > waveformHistorySize) {
-    waveformHistory.shift();
   }
 }
 
