@@ -49,6 +49,7 @@ Your browser does not support the audio element.
 <BR><BR>
 <FONT FACE="Courier" SIZE="+1" COLOR="#000000"><B>VISUALIZER MODE:</B></FONT><BR>
 <INPUT TYPE="BUTTON" VALUE="SCOPE" ONCLICK="setMode('scope')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
+<INPUT TYPE="BUTTON" VALUE="WAVEFORM" ONCLICK="setMode('waveform')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 <INPUT TYPE="BUTTON" VALUE="STEREOMETER" ONCLICK="setMode('stereo')" STYLE="font-family: Courier; font-size: 12px; padding: 5px 15px; margin: 5px; border: 2px solid #000000; background-color: #FFFFFF; cursor: pointer;">
 </DIV>
 <BR><BR>
@@ -84,12 +85,16 @@ var source = null;
 var currentColor = '#000000';
 var mainChar = '*';
 var nearChar = '.';
-var currentMode = 'scope'; // 'scope' or 'stereo'
+var currentMode = 'scope'; // 'scope', 'waveform', or 'stereo'
 var splitter = null;
 var leftAnalyser = null;
 var rightAnalyser = null;
 var leftDataArray = null;
 var rightDataArray = null;
+
+// Waveform history buffer for long-term display
+var waveformHistory = [];
+var waveformHistorySize = 500; // Number of frames to keep
 
 // Click drop zone to select file
 dropZone.onclick = function() {
@@ -218,7 +223,7 @@ function visualize() {
     if(!analyser || !dataArray) return;
     
     if(currentMode === 'scope') {
-      // SCOPE MODE - Single waveform
+      // SCOPE MODE - Single waveform (current frame)
       analyser.getByteTimeDomainData(dataArray);
       
       var width = 100;
@@ -238,6 +243,54 @@ function visualize() {
             line += mainChar;
           } else if(Math.abs(y - yPos) === 1) {
             line += nearChar;
+          } else {
+            line += ' ';
+          }
+        }
+        output += line + '\n';
+      }
+      
+      scopeVisualizer.textContent = output;
+    } else if(currentMode === 'waveform') {
+      // WAVEFORM MODE - Long-term scrolling waveform
+      analyser.getByteTimeDomainData(dataArray);
+      
+      // Calculate average or center value for this frame
+      var sum = 0;
+      for(var i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      var avgValue = sum / dataArray.length;
+      
+      // Add to history buffer
+      waveformHistory.push(avgValue);
+      if(waveformHistory.length > waveformHistorySize) {
+        waveformHistory.shift(); // Remove oldest
+      }
+      
+      var width = 100;
+      var height = 25;
+      var output = '';
+      
+      // Display the history scrolling left to right
+      for(var y = 0; y < height; y++) {
+        var line = '';
+        for(var x = 0; x < width; x++) {
+          // Map x to history index (most recent on right)
+          var historyIndex = Math.floor((x / width) * waveformHistory.length);
+          if(historyIndex < waveformHistory.length) {
+            var value = waveformHistory[historyIndex];
+            var normalizedValue = ((value - 128) / 128) * (height / 2);
+            var yPos = Math.floor((height / 2) - normalizedValue);
+            yPos = Math.max(0, Math.min(height - 1, yPos));
+            
+            if(y === yPos) {
+              line += mainChar;
+            } else if(Math.abs(y - yPos) === 1) {
+              line += nearChar;
+            } else {
+              line += ' ';
+            }
           } else {
             line += ' ';
           }
