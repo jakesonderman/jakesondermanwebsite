@@ -83,7 +83,7 @@ var jeremyElement = document.getElementById('jeremyPet');
 var isAnimating = false;
 var idleTimeout;
 
-// Idle animations (3 different ones) - simple cat design
+// Idle animations - redesigned from scratch using reference
 var idleAnimations = [
   [
     '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
@@ -105,50 +105,49 @@ var idleAnimations = [
   ]
 ];
 
-// Pet animation - hand petting from scratch with reference
+// Pet animation - completely redesigned from scratch
 var petFrames = [
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
+  '      ___   \n     (   )  \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '      ___   \n     (   )  \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '      ___   \n     (   )  \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '      ___   \n     (   )  \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
   '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '    \\___/   \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '    \\___/   \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '    \\___/   \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '    \\___/   \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '    \\___/   \n   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
   '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
-  '   |\\---/|  \n   | ^_^ |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   '
 ];
 
-// Feed animation - eating with food from scratch with reference
+// Feed animation - completely redesigned from scratch
 var feedFrames = [
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
-  '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
-  '   |\\---/|  \n   | o_O |  \n    \\_^_/   ',
-  '   |\\---/|  \n   | o<><o|  \n    \\_^_/   ',
-  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
-  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
-  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
-  '   |\\---/|  \n   | o<><o|  \n    \\_~_/   ',
-  '   |\\---/|  \n   | o_O |  \n    \\_~_/   ',
+  '   |\\---/|  \n   | O_O |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | O_O |  \n    \\_v_/   ',
+  '   |\\---/|  \n   |O*_*O|  \n    \\_v_/   ',
+  '   |\\---/|  \n   |O*_*O|  \n    \\_~_/   ',
+  '   |\\---/|  \n   |O*_*O|  \n    \\_~_/   ',
+  '   |\\---/|  \n   |O*_*O|  \n    \\_~_/   ',
+  '   |\\---/|  \n   | O_O |  \n    \\_~_/   ',
+  '   |\\---/|  \n   | o_o |  \n    \\_~_/   ',
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   '
 ];
 
-// Sleep animation - sideways sleeping with tail up and Z's from scratch
+// Sleep animation - completely redesigned from scratch
 var sleepFrames = [
   '   |\\---/|  \n   | o_o |  \n    \\_^_/   ',
   '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
+  '   |\\---/|  \n   | -_- |  \n    \\_^_/   ',
   '  |\\---/|   \n  | -_- |   \n   \\_^_/    ',
-  '  |\\---/|   z\n  | -_- |   z\n   \\_^_/    z',
-  ' |\\---/|    zz    |\n | -_- |    zz    |\n  \\_^_/     zz    |',
-  '|\\---/|     zzz   |\n| -_- |     zzz   |\n \\_^_/      zzz   |',
-  '|\\---/|     zzzz  |\n| -_- |     zzzz  |\n \\_^_/      zzzz  |',
-  '|\\---/|     zzzzz |\n| -_- |     zzzzz |\n \\_^_/      zzzzz |',
-  '|\\---/|     zzzzzz|\n| -_- |     zzzzzz|\n \\_^_/      zzzzzz|',
-  '|\\---/|     zzzzzzz|\n| -_- |     zzzzzzz|\n \\_^_/      zzzzzzz|',
-  '|\\---/|     zzzzzzzz|\n| -_- |     zzzzzzzz|\n \\_^_/      zzzzzzzz|',
-  '|\\---/|     zzzzzzzzz|\n| -_- |     zzzzzzzzz|\n \\_^_/      zzzzzzzzz|',
-  '|\\---/|     zzzzzzzzz|\n| -_- |     zzzzzzzzz|\n \\_^_/      zzzzzzzzz|'
+  ' |\\---/|    z\n | -_- |    z\n  \\_^_/       |',
+  '|\\---/|     z\n| -_- |     z\n \\_^_/      z |',
+  '|\\---/|     zz   |\n| -_- |     zz   |\n \\_^_/      zz   |',
+  '|\\---/|     zzz  |\n| -_- |     zzz  |\n \\_^_/      zzz  |',
+  '|\\---/|     zzzz |\n| -_- |     zzzz |\n \\_^_/      zzzz |',
+  '|\\---/|     zzzzz|\n| -_- |     zzzzz|\n \\_^_/      zzzzz|',
+  '|\\---/|     zzzzz|\n| -_- |     zzzzz|\n \\_^_/      zzzzz|',
+  '|\\---/|     zzzzz|\n| -_- |     zzzzz|\n \\_^_/      zzzzz|'
 ];
 
 var currentIdleAnim = 0;
